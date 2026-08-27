@@ -176,6 +176,8 @@ pub fn run() {
 			save_link,
 			backup_now,
 			get_backup_meta,
+			install_backup_agent,
+			uninstall_backup_agent,
 			set_extension_server,
 			get_extension_status,
 			notes::notes_list_vaults,
@@ -743,6 +745,72 @@ fn get_backup_meta(app: AppHandle) -> Result<Option<String>, String> {
 	} else {
 		Ok(None)
 	}
+}
+
+// ---------------------------------------------------------------------------
+// Launchd backup agent (backups while the app is closed)
+// ---------------------------------------------------------------------------
+
+const LAUNCHD_LABEL: &str = "com.fractalgrab.backup";
+
+fn launchd_plist_path() -> PathBuf {
+	dirs::home_dir()
+		.unwrap_or_else(|| PathBuf::from("."))
+		.join("Library/LaunchAgents")
+		.join(format!("{LAUNCHD_LABEL}.plist"))
+}
+
+#[tauri::command]
+fn install_backup_agent(app: AppHandle) -> Result<(), String> {
+	use std::io::Write;
+
+	let agent_dir = dirs::home_dir()
+		.unwrap_or_else(|| PathBuf::from("."))
+		.join("Library/LaunchAgents");
+	fs::create_dir_all(&agent_dir).map_err(|e| e.to_string())?;
+
+	let app_dir = app
+		.path()
+		.resource_dir()
+		.map_err(|e| e.to_string())?;
+	let script = app_dir.join("scripts/backup-agent.sh");
+
+	let mut plist = String::new();
+	plist.push_str("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+	plist.push_str("<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" ");
+	plist.push_str("\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n");
+	plist.push_str("<plist version=\"1.0\">\n");
+	plist.push_str("<dict>\n");
+	plist.push_str(&format!("\t<key>Label</key>\n\t<string>{LAUNCHD_LABEL}</string>\n"));
+	plist.push_str("\t<key>ProgramArguments</key>\n\t<array>\n");
+	plist.push_str(&format!("\t\t<string>/bin/bash</string>\n\t\t<string>{}</string>\n", script.to_string_lossy()));
+	plist.push_str("\t</array>\n");
+	plist.push_str("\t<key>StartInterval</key>\n\t<integer>3600</integer>\n");
+	plist.push_str("\t<key>RunAtLoad</key>\n\t<true/>\n");
+	plist.push_str("</dict>\n</plist>\n");
+
+	let plist_path = launchd_plist_path();
+	let mut f = fs::File::create(&plist_path).map_err(|e| e.to_string())?;
+	f.write_all(plist.as_bytes()).map_err(|e| e.to_string())?;
+	f.sync_all().map_err(|e| e.to_string())?;
+
+	let _ = std::process::Command::new("launchctl")
+		.args(["load", "-w", &plist_path.to_string_lossy()])
+		.output();
+
+	Ok(())
+}
+
+#[tauri::command]
+fn uninstall_backup_agent() -> Result<(), String> {
+	let plist_path = launchd_plist_path();
+	if plist_path.exists() {
+		let _ = std::process::Command::new("launchctl")
+			.args(["unload", &plist_path.to_string_lossy()])
+			.output();
+		let _ = fs::remove_file(&plist_path);
+	}
+	Ok(())
 }
 
 // ---------------------------------------------------------------------------

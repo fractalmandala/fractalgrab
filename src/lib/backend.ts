@@ -59,6 +59,8 @@ export interface Backend {
 	notesCreate(dir: string, kind: 'note' | 'folder', name: string): Promise<string>;
 	notesWatchVault(path: string): Promise<void>;
 	notesUnwatchVault(path: string): Promise<void>;
+	installBackupAgent(): Promise<void>;
+	uninstallBackupAgent(): Promise<void>;
 }
 
 // Browser-mode in-memory file store (data URLs). Only used for preview.
@@ -184,6 +186,12 @@ function tauriBackend(): Backend {
 		},
 		async notesUnwatchVault(path) {
 			await invoke('notes_unwatch_vault', { path });
+		},
+		async installBackupAgent() {
+			await invoke('install_backup_agent');
+		},
+		async uninstallBackupAgent() {
+			await invoke('uninstall_backup_agent');
 		}
 	};
 }
@@ -443,7 +451,9 @@ function browserBackend(): Backend {
 			return out;
 		},
 		async notesWatchVault() {},
-		async notesUnwatchVault() {}
+		async notesUnwatchVault() {},
+		async installBackupAgent() {},
+		async uninstallBackupAgent() {}
 	};
 }
 

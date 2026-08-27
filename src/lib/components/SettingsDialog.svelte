@@ -59,7 +59,11 @@
 		manifest.settings.backup = { enabled: backupEnabled, intervalHours: Math.max(1, backupHours) };
 		manifest.settings.extensionServer = extServer;
 		persistNow();
-		if (isTauri()) backend.setExtensionServer(extServer).catch(() => {});
+		if (isTauri()) {
+			backend.setExtensionServer(extServer).catch(() => {});
+			if (backupEnabled) backend.installBackupAgent().catch(() => {});
+			else backend.uninstallBackupAgent().catch(() => {});
+		}
 		toast('Settings saved', 'success');
 	}
 
