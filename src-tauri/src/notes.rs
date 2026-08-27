@@ -2,13 +2,23 @@
 // operations. Vaults are registered in config.json (machine-local app state);
 // documents live on the user's real filesystem at absolute paths.
 
+use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::sync::{Mutex, OnceLock};
+use std::time::Duration;
 
+use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use serde::Serialize;
-use tauri::State;
+use tauri::{AppHandle, Emitter, Manager, State};
 
 use crate::{read_config, write_config, AppState};
+
+/// Global registry of active vault watchers keyed by vault path.
+fn watchers() -> &'static Mutex<HashMap<String, Mutex<RecommendedWatcher>>> {
+	static WATCHERS: OnceLock<Mutex<HashMap<String, Mutex<RecommendedWatcher>>>> = OnceLock::new();
+	WATCHERS.get_or_init(|| Mutex::new(HashMap::new()))
+}
 
 #[derive(Serialize, Clone)]
 pub struct VaultMeta {
@@ -393,6 +403,63 @@ pub fn notes_create(dir: String, kind: String, name: String) -> Result<String, S
 		_ => return Err("Unknown kind".into()),
 	}
 	Ok(out.to_string_lossy().to_string())
+}
+
+// ---------------------------------------------------------------------------
+// File watching
+// ---------------------------------------------------------------------------
+
+#[tauri::command]
+pub fn notes_watch_vault(app: AppHandle, path: String) -> Result<(), String> {
+	{
+		let mut watchers = watchers().lock().map_err(|e| e.to_string())?;
+		// Remove any existing watcher for this path
+		watchers.remove(&path);
+	}
+
+	let p = PathBuf::from(&path);
+	if !p.is_dir() {
+		return Err("Path is not a directory".into());
+	}
+
+	let app_handle = app.clone();
+	let watch_path = path.clone();
+
+	let mut watcher: RecommendedWatcher =
+		notify::recommended_watcher(move |res: Result<Event, notify::Error>| {
+			if let Ok(event) = res {
+				// Only emit on create/remove/rename — skip modify to avoid spammmy refreshes
+				match event.kind {
+					EventKind::Create(_)
+					| EventKind::Remove(_)
+					| EventKind::Modify(notify::event::ModifyKind::Name(_)) => {
+						// Debounce: wait 200ms then emit
+						std::thread::sleep(Duration::from_millis(200));
+						let _ = app_handle.emit("vault-changed", &watch_path);
+				}
+				_ => {}
+			}
+		}
+	})
+	.map_err(|e| e.to_string())?;
+
+	watcher
+		.watch(&p, RecursiveMode::Recursive)
+		.map_err(|e| e.to_string())?;
+
+	{
+		let mut watchers = watchers().lock().map_err(|e| e.to_string())?;
+		watchers.insert(path, Mutex::new(watcher));
+	}
+
+	Ok(())
+}
+
+#[tauri::command]
+pub fn notes_unwatch_vault(path: String) -> Result<(), String> {
+	let mut watchers = watchers().lock().map_err(|e| e.to_string())?;
+	watchers.remove(&path);
+	Ok(())
 }
 
 // ---------------------------------------------------------------------------

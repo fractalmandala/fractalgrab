@@ -191,6 +191,8 @@ pub fn run() {
 			notes::notes_move,
 			notes::notes_create,
 			notes::notes_open_external,
+			notes::notes_watch_vault,
+			notes::notes_unwatch_vault,
 		])
 		.run(tauri::generate_context!())
 		.expect("error while running tauri application");

@@ -68,6 +68,11 @@ export async function initNotes() {
 		activeVaultId = saved.activeVaultId;
 		expanded = expandedByVault.get(saved.activeVaultId) ?? new Set();
 		await refreshTree();
+		// Start watching the active vault for file-system changes
+		if (isTauri()) {
+			const v = activeVault();
+			if (v) backend.notesWatchVault(v.path).catch(() => {});
+		}
 	}
 	// Build a lookup of saved per-tab view preferences
 	const viewPrefs = new Map<string, 'raw' | 'rich'>();
@@ -80,6 +85,17 @@ export async function initNotes() {
 	window.addEventListener('focus', () => {
 		if (activeVaultId) void refreshTree();
 	});
+	// Listen for file-system changes from the Rust watcher
+	if (isTauri()) {
+		import('@tauri-apps/api/event').then(({ listen }) => {
+			listen<string>('vault-changed', (event) => {
+				const v = activeVault();
+				if (v && event.payload === v.path) {
+					void refreshTree();
+				}
+			});
+		});
+	}
 	if (isTauri()) wireCloseFlush();
 	notesReady = true;
 }
@@ -152,12 +168,22 @@ export async function removeVault(id: string) {
 }
 
 export async function setActiveVault(id: string) {
+	// Unwatch the old vault
+	if (isTauri() && activeVaultId) {
+		const old = vaults.find((v) => v.id === activeVaultId);
+		if (old) backend.notesUnwatchVault(old.path).catch(() => {});
+	}
 	activeVaultId = id;
 	manifest.settings.notes.activeVaultId = id;
 	persist();
 	expanded = expandedByVault.get(id) ?? new Set();
 	await refreshTree();
 	backend.notesSetActiveVault(id).catch(() => {});
+	// Watch the new vault
+	if (isTauri()) {
+		const v = activeVault();
+		if (v) backend.notesWatchVault(v.path).catch(() => {});
+	}
 }
 
 export async function refreshTree() {

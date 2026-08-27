@@ -15,6 +15,7 @@
 		Upload,
 		X,
 		Search,
+		Palette
 	} from '@lucide/svelte';
 	import CollectionTree from '../lib/components/CollectionTree.svelte';
 	import NotesSidebar from '../lib/components/notes/NotesSidebar.svelte';
@@ -48,7 +49,6 @@
 		aiReady,
 		ui
 	} from '../lib/store.svelte';
-	import Header from '$lib/components/Header.svelte'
 	import { initNotes } from '../lib/notes/notes.svelte';
 	import { notesUi } from '../lib/notes/notes.svelte';
 	import { colorName } from '../lib/color';
@@ -174,7 +174,85 @@
 	{:else}
 
 		<div class="row grow min-h-0">
-			<aside class="box shrink-0 min-h-0 bg-surface border-right" style="width:250px;">
+			<aside class="box shrink-0 min-h-0 bg-surface border-right gap16" style="width:250px;">
+	<div class="row ycenter gap16 pad8">
+		<div style="position:relative;">
+			<button
+				class="button is-icon"
+				title="Search by colour"
+				onclick={() => (colorSearchOpen = !colorSearchOpen)}
+			>
+				<Palette size={16}/>
+			</button>
+			{#if colorSearchOpen}
+				<div
+					style="position:absolute; right:0; top:36px; background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:10px; box-shadow:var(--shadow-lg); z-index:50; width:220px;"
+				>
+					<div class="chips">
+						{#each paletteChips as hex}
+							<button
+								class="color-dot"
+								style="width:22px; height:22px; background:{hex}; {ui.activeColorSearch ===
+								hex
+									? 'outline: 2px solid var(--theme);'
+									: ''}"
+								title={colorName(hex)}
+								onclick={() => toggleColour(hex)}
+							></button>
+						{/each}
+					</div>
+					{#if !paletteChips.length}
+						<p class="text-xs text-muted" style="margin:0;">
+							Save images to build a colour palette.
+						</p>
+					{/if}
+				</div>
+			{/if}
+		</div>
+		<button class="button is-icon" onclick={openCapture}>
+			<Plus size={16} />
+		</button>
+		<button class="button is-icon" onclick={openSettings}>
+			<Settings size={16} />
+		</button>
+	</div>
+	<div class="row search-input ycenter gap8">
+		<Search size={16} />
+		<input
+			id="app-search"
+			placeholder=""
+			value={ui.searchQuery}
+			oninput={(e) => {
+				setSearch(e.currentTarget.value);
+				clearAiSearch();
+			}}
+			onkeydown={(e) => {
+				if (e.key === "Enter" && !e.shiftKey) aiSearchNow();
+			}}
+		/>
+		{#if ui.searchQuery || ui.activeColorSearch}
+			<button
+				class="button"
+				data-variant="icon"
+				onclick={clearSearch}
+				title="Clear search"
+			>
+				<X size={16} />
+			</button>
+		{/if}
+		{#if aiReady()}
+			<button
+				class="button"
+				data-variant="quiet"
+				data-size="sm"
+				onclick={aiSearchNow}
+				disabled={ui.busy || !ui.searchQuery.trim()}
+				title="Full-sentence AI search"
+			>
+				<Sparkles size={12} /> AI
+			</button>
+		{/if}
+	</div>
 				{#if manifest.settings.view === 'notes'}
 					<NotesSidebar />
 				{:else}
@@ -182,7 +260,6 @@
 				{/if}
 			</aside>
 			<main class="box grow min-w-0">
-				<Header/>
 				<div class="toolbar">
 					{#if manifest.settings.view === 'notes'}
 						<span class="text-xs fw600">

@@ -22,12 +22,9 @@
 </script>
 
 <div class="box grow min-h-0">
-	<div class="sidebar-header">
-		<span>Library</span>
-	</div>
-	<div style="padding: 4px 8px;">
-		<button class="nav-item" data-state={ui.selectedCollectionId === null ? 'active' : 'idle'} onclick={() => setCollection(null)}>
-			<Layers size={15} /> All items
+	<div class="box gap8 padleft8 padright8">
+		<button class="nav-item" class:active={ui.selectedCollectionId === null} onclick={() => setCollection(null)}>
+			<Layers size={14} /> All items
 			<span class="nav-item-count">{manifest.items.length}</span>
 		</button>
 		<button class="nav-item" data-state={ui.selectedCollectionId === '__fav__' ? 'active' : 'idle'} onclick={() => setCollection('__fav__')}>

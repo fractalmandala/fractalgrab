@@ -32,20 +32,21 @@
 .nav-item
 	display: flex
 	align-items: center
-	gap: var(--space-2xs)
+	gap: 8px
 	width: 100%
-	padding: var(--space-2xs) var(--space-xs)
-	border-radius: var(--radius-6)
+	padding: 4px
+	border-radius: 4px
 	color: var(--text-secondary)
-	font-size: var(--text-md)
+	font-size: var(--text-sm)
 	text-align: left
 	transition: background 0.1s ease, color 0.1s ease
 	&:hover
 		background: var(--bg-raised)
 		color: var(--text-primary)
-	&[data-state='active']
-		background: color-mix(in srgb, var(--theme) 14%, transparent)
+	&.active
 		color: var(--theme)
+		span
+			color: var(--theme)
 	:where(.nav-item-count)
 		margin-left: auto
 		font-size: var(--text-xs)

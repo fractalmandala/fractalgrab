@@ -57,6 +57,8 @@ export interface Backend {
 	notesRename(path: string, newName: string): Promise<string>;
 	notesDelete(path: string): Promise<void>;
 	notesCreate(dir: string, kind: 'note' | 'folder', name: string): Promise<string>;
+	notesWatchVault(path: string): Promise<void>;
+	notesUnwatchVault(path: string): Promise<void>;
 }
 
 // Browser-mode in-memory file store (data URLs). Only used for preview.
@@ -176,6 +178,12 @@ function tauriBackend(): Backend {
 		},
 		async notesCreate(dir, kind, name) {
 			return invoke<string>('notes_create', { dir, kind, name });
+		},
+		async notesWatchVault(path) {
+			await invoke('notes_watch_vault', { path });
+		},
+		async notesUnwatchVault(path) {
+			await invoke('notes_unwatch_vault', { path });
 		}
 	};
 }
@@ -433,7 +441,9 @@ function browserBackend(): Backend {
 				virtualDirs.add(out);
 			}
 			return out;
-		}
+		},
+		async notesWatchVault() {},
+		async notesUnwatchVault() {}
 	};
 }
 
