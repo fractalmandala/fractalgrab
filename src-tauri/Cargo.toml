@@ -1,0 +1,35 @@
+[package]
+name = "fractalgrab"
+version = "0.1.0"
+description = "Your own visual bookmark manager for Mac"
+authors = ["fractalgrab"]
+edition = "2021"
+
+[lib]
+name = "fractalgrab_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "http2", "blocking"] }
+tokio = { version = "1", features = ["time", "rt", "rt-multi-thread"] }
+dirs = "6"
+open = "5"
+url = "2"
+zip = { version = "2", default-features = false, features = ["deflate", "time"] }
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+regex = "1"
+base64 = "0.22"
+uuid = { version = "1", features = ["v4"] }
+trash = "5"
+
+[profile.release]
+codegen-units = 1
+lto = true
+strip = true

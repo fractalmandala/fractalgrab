@@ -1,0 +1,32 @@
+{
+	"manifest_version": 3,
+	"name": "FractalGrab Clipper",
+	"version": "0.1.0",
+	"description": "Save pages, links, images and selections into FractalGrab on your Mac. Talks only to the app on your own machine — nothing leaves it.",
+	"permissions": ["contextMenus", "activeTab", "scripting", "storage"],
+	"host_permissions": ["http://127.0.0.1:48123/*", "<all_urls>"],
+	"background": {
+		"service_worker": "background.js"
+	},
+	"content_scripts": [
+		{
+			"matches": ["<all_urls>"],
+			"js": ["content.js"],
+			"run_at": "document_idle"
+		}
+	],
+	"action": {
+		"default_popup": "popup.html",
+		"default_title": "FractalGrab",
+		"default_icon": {
+			"16": "icons/16.png",
+			"48": "icons/48.png",
+			"128": "icons/128.png"
+		}
+	},
+	"icons": {
+		"16": "icons/16.png",
+		"48": "icons/48.png",
+		"128": "icons/128.png"
+	}
+}

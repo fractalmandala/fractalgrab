@@ -1,0 +1,14 @@
+allowBuilds:
+  '@parcel/watcher': set this to true or false
+  esbuild: set this to true or false
+  tesseract.js: set this to true or false
+minimumReleaseAgeExclude:
+  - fractals-styler@2.3.4
+onlyBuiltDependencies:
+  - esbuild
+  - '@parcel/watcher'
+  - tesseract.js
+  - sharp
+
+strictDepBuilds: false
+verifyDepsBeforeRun: false

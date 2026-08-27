@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<style>
+			body {
+				font-family: system-ui, -apple-system, sans-serif;
+				margin: 0;
+				width: 240px;
+				background: #131313;
+				color: #f9fafb;
+				font-size: 13px;
+			}
+			header {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				padding: 10px 12px;
+				border-bottom: 1px solid #2f3030;
+				font-weight: 700;
+			}
+			.logo {
+				width: 18px;
+				height: 18px;
+				border-radius: 5px;
+				background: conic-gradient(#f97316, #ec4899, #8b5cf6, #06b6d4, #f97316);
+			}
+			main {
+				padding: 10px 12px;
+				display: flex;
+				flex-direction: column;
+				gap: 6px;
+			}
+			button {
+				background: #222222;
+				color: #f9fafb;
+				border: 1px solid #2f3030;
+				border-radius: 8px;
+				padding: 8px 10px;
+				cursor: pointer;
+				text-align: left;
+			}
+			button:hover {
+				background: #363636;
+			}
+			.status {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				font-size: 12px;
+				color: #929497;
+				padding: 2px 2px 8px;
+			}
+			.dot {
+				width: 8px;
+				height: 8px;
+				border-radius: 50%;
+				background: #ef4444;
+			}
+			.dot.ok {
+				background: #10b981;
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<div class="logo"></div>
+			FractalGrab Clipper
+		</header>
+		<main>
+			<div class="status"><span class="dot" id="dot"></span><span id="status">Checking app…</span></div>
+			<button id="page">Save this page</button>
+			<button id="pick">Pick an element on the page…</button>
+		</main>
+		<script src="popup.js"></script>
+	</body>
+</html>
