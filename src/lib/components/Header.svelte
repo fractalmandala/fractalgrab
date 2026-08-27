@@ -12,7 +12,7 @@
 		openSettings,
 	} from "$lib/store.svelte";
 	import { colorName } from "$lib/color";
-	import { Search, Sparkles, Plus, Settings, X } from "@lucide/svelte";
+	import { Search, Sparkles, Plus, Settings, X, Palette } from "@lucide/svelte";
 
 	let colorSearchOpen = $state(false);
 
@@ -49,13 +49,13 @@
 <header class="row appheader ycenter xbetween">
 	<div class="logo row ycenter gap8">
 		<img class="logomotif" src="/images/logomotif.png" alt="motif" />
-		<img class="logotype" src="/images/logotype-b.png" alt="type" />
 	</div>
-	<div class="row search-input gap8">
-		<Search size={16} />
+	<div class="row ycenter gap16">
+	<div class="row search-input ycenter gap8">
+		<Search size={12} />
 		<input
 			id="app-search"
-			placeholder="Search everything..."
+			placeholder=""
 			value={ui.searchQuery}
 			oninput={(e) => {
 				setSearch(e.currentTarget.value);
@@ -88,19 +88,13 @@
 			</button>
 		{/if}
 	</div>
-	<div class="row ycenter gap8">
 		<div style="position:relative;">
 			<button
-				class="button"
-				data-variant="icon"
+				class="button is-icon"
 				title="Search by colour"
 				onclick={() => (colorSearchOpen = !colorSearchOpen)}
 			>
-				<span
-					class="color-dot"
-					style="width:16px; height:16px; background:{ui.activeColorSearch ??
-						'conic-gradient(#e6194b, #f58231, #ffe119, #3cb44b, #4363d8, #911eb4, #e6194b)'};"
-				></span>
+				<Palette size={16}/>
 			</button>
 			{#if colorSearchOpen}
 				<div
@@ -127,12 +121,11 @@
 				</div>
 			{/if}
 		</div>
-
-		<button class="button" data-variant="primary" onclick={openCapture}>
-			<Plus size={16} /> Capture
+		<button class="button is-icon" onclick={openCapture}>
+			<Plus size={16} />
 		</button>
-		<button class="button" data-variant="icon" title="Settings" onclick={openSettings}>
-			<Settings size={17} />
+		<button class="button is-icon" onclick={openSettings}>
+			<Settings size={16} />
 		</button>
 	</div>
 </header>

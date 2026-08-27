@@ -159,6 +159,7 @@
 </script>
 
 {#if ui.settingsOpen}
+	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 	<div class="overlay" onclick={(e) => { if (e.target === e.currentTarget) closeSettings(); }}>
 		<div class="panel">
 			<div class="panel-header">
@@ -168,7 +169,7 @@
 
 			<div class="panel-body">
 				<div class="field">
-					<label>Library folder — real files, no lock-in</label>
+					<span class="text-xs" style="font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">Library folder — real files, no lock-in</span>
 					<div class="row ycenter gap8">
 						<span class="grow text-xs text-muted truncate">{ui.libraryDir}</span>
 						<button class="button" data-variant="quiet" data-size="sm" onclick={chooseLibrary} disabled={busy}>Change…</button>
@@ -176,9 +177,9 @@
 				</div>
 
 				<div class="field">
-					<label>Browser extension server (localhost :48123)</label>
+					<span class="text-xs" style="font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">Browser extension server (localhost :48123)</span>
 					<div class="row ycenter gap8">
-						<button class="switch" data-state={extServer ? 'on' : 'off'} onclick={() => (extServer = !extServer)} role="switch" aria-checked={extServer}></button>
+						<button class="switch" data-state={extServer ? 'on' : 'off'} onclick={() => (extServer = !extServer)} role="switch" aria-checked={extServer} aria-label="Extension server"></button>
 						<span class="text-xs text-muted">Lets the Chrome companion clipper talk to this app on your machine only.</span>
 					</div>
 				</div>
@@ -186,7 +187,7 @@
 				<hr class="divider" style="margin:4px 0;" />
 
 				<div class="field">
-					<label>AI providers — bring your own, any number, any OpenAI-compatible endpoint</label>
+					<span class="text-xs" style="font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">AI providers — bring your own, any number, any OpenAI-compatible endpoint</span>
 
 					{#each providers as p, i (p.id)}
 						<div class="card box gap8" style="padding:12px; {p.id === activeProviderId ? 'border-color: var(--theme);' : ''}">
@@ -200,9 +201,7 @@
 								{/if}
 							</div>
 							<input placeholder="Base URL, e.g. https://api.openai.com/v1" value={p.baseUrl} oninput={(e) => updateProvider(p.id, { baseUrl: e.currentTarget.value })} />
-							<input type="password" placeholder="API key" value={p.key} oninput={(e) => updateProvider(p.id, { key: e.currentTarget.value })} />
-							<input
-								placeholder="Models, comma-separated (e.g. gpt-4o-mini, gpt-4o)"
+							<input type="password" placeholder="API key" value={p.key} oninput={(e) => updateProvider(p.id, { key: e.currentTarget.value })} />									<input aria-label="Models" placeholder="Models, comma-separated (e.g. gpt-4o-mini, gpt-4o)"
 								value={p.models.join(', ')}
 								oninput={(e) => updateProvider(p.id, { models: parseModels(e.currentTarget.value) })}
 							/>
@@ -214,8 +213,8 @@
 					</div>
 
 					<div class="row ycenter gap8">
-						<label class="text-xs" style="white-space:nowrap;">Active model</label>
-						<select
+						<label for="active-model" class="text-xs" style="white-space:nowrap;">Active model</label>
+						<select id="active-model"
 							value={activeModel}
 							onchange={(e) => (activeModel = e.currentTarget.value)}
 							style="flex:1;"
@@ -247,11 +246,11 @@
 				<hr class="divider" style="margin:4px 0;" />
 
 				<div class="field">
-					<label>Backups</label>
+					<span class="text-xs" style="font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">Backups</span>
 					<div class="row ycenter gap8">
-						<button class="switch" data-state={backupEnabled ? 'on' : 'off'} onclick={() => (backupEnabled = !backupEnabled)} role="switch" aria-checked={backupEnabled}></button>
+						<button class="switch" data-state={backupEnabled ? 'on' : 'off'} onclick={() => (backupEnabled = !backupEnabled)} role="switch" aria-checked={backupEnabled} aria-label="Backups"></button>
 						<span class="text-xs">Every</span>
-						<input type="number" min="1" bind:value={backupHours} style="width:64px;" /> <span class="text-xs">hours</span>
+						<input type="number" min="1" bind:value={backupHours} style="width:64px;" aria-label="Backup interval in hours" /> <span class="text-xs">hours</span>
 					</div>
 					<div class="row ycenter gap8">
 						<button class="button" data-variant="quiet" data-size="sm" onclick={backupNow} disabled={busy}>Back up now</button>

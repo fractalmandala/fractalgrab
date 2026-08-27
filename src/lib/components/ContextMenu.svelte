@@ -238,6 +238,7 @@
 		bind:this={menuEl}
 		style="left:{posX}px; top:{posY}px;"
 		role="menu"
+		tabindex="-1"
 		oncontextmenu={(e) => e.preventDefault()}
 	>
 		{#if ui.menu.stack.length > 1}
@@ -262,6 +263,7 @@
 {/if}
 
 {#if ui.ask}
+	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 	<div class="overlay" onclick={(e) => { if (e.target === e.currentTarget) closeAsk(); }}>
 		<div class="panel" style="width:min(360px, 90vw);">
 			<div class="panel-header">
@@ -269,7 +271,6 @@
 			</div>
 			<div class="panel-body">
 				<input
-					autofocus
 					placeholder={ui.ask.placeholder}
 					bind:value={askValue}
 					onkeydown={(e) => {

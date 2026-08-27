@@ -172,7 +172,6 @@
 			<p class="text-muted">Opening your library…</p>
 		</div>
 	{:else}
-		<Header/>
 
 		<div class="row grow min-h-0">
 			<aside class="box shrink-0 min-h-0 bg-surface border-right" style="width:250px;">
@@ -182,8 +181,8 @@
 					<CollectionTree />
 				{/if}
 			</aside>
-
 			<main class="box grow min-w-0">
+				<Header/>
 				<div class="toolbar">
 					{#if manifest.settings.view === 'notes'}
 						<span class="text-xs fw600">
@@ -214,7 +213,6 @@
 						{/each}
 					</div>
 				</div>
-
 				{#if manifest.settings.view !== 'notes' && ui.untrackedFiles.length}
 					<div class="row ycenter gap8" style="padding: 6px 16px; background: color-mix(in srgb, var(--feedback-info) 10%, transparent); border-bottom: 1px solid var(--border); flex-wrap: wrap;">
 						<span class="text-xs text-muted">{ui.untrackedFiles.length} file{ui.untrackedFiles.length > 1 ? 's' : ''} found in your library folder</span>
@@ -228,7 +226,6 @@
 						{/if}
 					</div>
 				{/if}
-
 				{#if manifest.settings.view !== 'notes' && batchSelection.size}
 					<div class="row ycenter gap8" style="padding: 8px 16px; background: color-mix(in srgb, var(--theme) 8%, transparent); border-bottom: 1px solid var(--border); flex-wrap: wrap;">
 						<span class="text-xs fw600">{batchSelection.size} selected</span>
@@ -252,7 +249,6 @@
 						<button class="button" data-variant="icon" onclick={() => batchSelection.clear()}><X size={14} /></button>
 					</div>
 				{/if}
-
 				<div class="content">
 					{#if manifest.settings.view === 'notes'}
 						<NotesView />
@@ -263,7 +259,6 @@
 					{/if}
 				</div>
 			</main>
-
 			{#if manifest.settings.view !== 'notes' && ui.selectedItemId}
 				<ItemDetail />
 			{/if}

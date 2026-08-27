@@ -60,7 +60,10 @@
 	class="item-card"
 	data-state={selected ? 'selected' : isBatch ? 'batch' : 'idle'}
 	data-item-id={item.id}
+	role="button"
+	tabindex="0"
 	onclick={onClick}
+	onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && toggleSelect(item.id)}
 	ondragover={(e) => e.preventDefault()}
 	ondrop={(e) => e.preventDefault()}
 	draggable="true"

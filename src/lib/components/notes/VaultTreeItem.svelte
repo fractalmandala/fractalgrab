@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { ChevronDown, ChevronRight, File as FileIcon } from '@lucide/svelte';
 	import Icon from '../Icon.svelte';
+	import VaultTreeItem from './VaultTreeItem.svelte';
 	import type { VaultNode } from '$lib/types';
 	import {
 		notesUi,
@@ -32,9 +33,10 @@
 	style="padding-left: {6 + depth * 14}px;"
 	data-vault-path={path}
 	data-vault-dir="true"
-	role="treeitem"
+	role="treeitem" aria-selected="false"
 	tabindex="0"
 	aria-expanded={isExpanded}
+	aria-level={depth + 1}
 	onclick={(e) => {
 		e.stopPropagation();
 		toggleFolder(path);
@@ -67,7 +69,6 @@
 			class="grow"
 			style="min-width:0; padding:1px 6px; font-size:12px;"
 			value={node.name}
-			autofocus
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => {
 				if (e.key === 'Enter') {
@@ -91,7 +92,7 @@
 
 {#if isExpanded}
 	{#each node.dirs as child (child.name)}
-		<svelte:self node={child} path={`${path}/${child.name}`} depth={depth + 1} />
+		<VaultTreeItem node={child} path={`${path}/${child.name}`} depth={depth + 1} />
 	{/each}
 	{#each node.files as fname (fname)}
 		{@const file = fileRow(fname)}
@@ -101,8 +102,9 @@
 			style="padding-left: {6 + (depth + 1) * 14}px;"
 			data-vault-path={file.childPath}
 			data-vault-dir="false"
-			role="treeitem"
+			role="treeitem" aria-selected="false"
 			tabindex="0"
+			aria-level={depth + 2}
 			onclick={() => void openPath(file.childPath, true)}
 			onkeydown={(e) => {
 				if (notesUi.renamingPath === file.childPath) return;
@@ -122,7 +124,6 @@
 					class="grow"
 					style="min-width:0; padding:1px 6px; font-size:12px;"
 					value={fname}
-					autofocus
 					onclick={(e) => e.stopPropagation()}
 					onkeydown={(e) => {
 						if (e.key === 'Enter') {

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { ChevronDown, ChevronRight, Check, MoreHorizontal, Pencil, Plus, Trash2, X } from '@lucide/svelte';
 	import Icon from './Icon.svelte';
+	import TreeItem from './TreeItem.svelte';
 	import {
 		childCollections,
 		updateCollection,
@@ -205,6 +206,6 @@
 
 {#if expanded}
 	{#each children as child}
-		<svelte:self col={child} depth={depth + 1} />
+		<TreeItem col={child} depth={depth + 1} />
 	{/each}
 {/if}

@@ -14,6 +14,8 @@
 
 	const md = new MarkdownIt({ html: false, linkify: false, breaks: false });
 
+	// eslint-disable-next-line svelte/valid-compile — tab is reactive via $derived, initial value is correct because
+	// the component is keyed on tab.id and re-created on tab switch ({#key tab.id + tab.view})
 	let doc: MdDocument = $state(parseDocument(tab?.source ?? ''));
 	let lastPushed = $state(tab?.source ?? '');
 	let container: HTMLDivElement;
@@ -625,6 +627,7 @@
 		class="rich-host box grow min-h-0"
 		contenteditable="true"
 		role="textbox"
+		tabindex="0"
 		aria-multiline="true"
 		aria-label="Rich text editor"
 		bind:this={container}

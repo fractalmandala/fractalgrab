@@ -107,7 +107,10 @@
 						class="list-row"
 						data-state={ui.selectedItemId === item.id ? 'selected' : 'idle'}
 						data-item-id={item.id}
+						role="button"
+						tabindex="0"
 						onclick={() => toggleSelect(item.id)}
+						onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && toggleSelect(item.id)}
 					>
 						{@render rowIcon(item)}
 						<div style="min-width:0;">
@@ -127,7 +130,10 @@
 				class="list-row"
 				data-state={ui.selectedItemId === item.id ? 'selected' : 'idle'}
 				data-item-id={item.id}
+				role="button"
+				tabindex="0"
 				onclick={() => toggleSelect(item.id)}
+				onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && toggleSelect(item.id)}
 			>
 				{@render rowIcon(item)}
 				<div style="min-width:0;">

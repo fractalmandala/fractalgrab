@@ -57,8 +57,9 @@
 					style="padding-left: 6px;"
 					data-vault-path={fpath}
 					data-vault-dir="false"
-					role="treeitem"
+					role="treeitem" aria-selected="false"
 					tabindex="0"
+					aria-level="1"
 					onclick={() => void openPath(fpath, true)}
 					onkeydown={(e) => fileKeydown(e, fpath)}
 				>
@@ -69,7 +70,6 @@
 							class="grow"
 							style="min-width:0; padding:1px 6px; font-size:12px;"
 							value={fname}
-							autofocus
 							onclick={(e) => e.stopPropagation()}
 							onkeydown={(e) => {
 								if (e.key === 'Enter') {

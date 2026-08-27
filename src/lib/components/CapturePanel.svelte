@@ -177,6 +177,7 @@
 </script>
 
 {#if ui.captureOpen}
+	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 	<div class="overlay" onclick={(e) => { if (e.target === e.currentTarget) closeCapture(); }}>
 		<div class="panel">
 			<div class="panel-header">
@@ -195,9 +196,9 @@
 			<div class="panel-body">
 				{#if tab === 'link'}
 					<div class="field">
-						<label>URL</label>
+						<label for="capture-url">URL</label>
 						<input
-							autofocus
+							id="capture-url"
 							placeholder="https://…"
 							bind:value={url}
 							onkeydown={(e) => e.key === 'Enter' && doSaveUrl()}
@@ -213,6 +214,8 @@
 					<button class="button" onclick={readClipboard}>Read from clipboard</button>
 					<div
 						class="dropzone"
+						role="region"
+						aria-label="Drop zone"
 						data-state={dropActive ? 'drag' : 'idle'}
 						ondragover={(e) => { e.preventDefault(); dropActive = true; }}
 						ondragleave={() => (dropActive = false)}
@@ -226,6 +229,8 @@
 				{:else if tab === 'files'}
 					<div
 						class="dropzone"
+						role="region"
+						aria-label="Drop zone"
 						data-state={dropActive ? 'drag' : 'idle'}
 						ondragover={(e) => { e.preventDefault(); dropActive = true; }}
 						ondragleave={() => (dropActive = false)}
@@ -240,8 +245,8 @@
 					{/if}
 				{:else if tab === 'text'}
 					<div class="field">
-						<label>Title</label>
-						<input placeholder="Note title (optional)" bind:value={textTitle} />
+						<label for="capture-text-title">Title</label>
+						<input id="capture-text-title" placeholder="Note title (optional)" bind:value={textTitle} />
 					</div>
 					<textarea rows="6" placeholder="Write or paste anything — saved as a .md file" bind:value={textBody}></textarea>
 					<button
@@ -257,7 +262,7 @@
 					</button>
 				{:else}
 					<div class="field">
-						<label>Import</label>
+						<span class="text-xs" style="font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">Import</span>
 						<div class="row ycenter gap8" style="flex-wrap:wrap;">
 							<button class="button" onclick={() => { importKind = 'csv'; importFileInput?.click(); }}>CSV</button>
 							<button class="button" onclick={() => { importKind = 'json'; importFileInput?.click(); }}>JSON</button>

@@ -192,6 +192,8 @@
 
 <div
 	class="canvas {dragState?.kind === 'pan' ? 'dragging' : ''}"
+	role="application"
+	aria-label="Canvas"
 	onwheel={onWheel}
 	onpointerdown={onPointerDown}
 	onpointermove={onPointerMove}
@@ -207,8 +209,11 @@
 				style="left:{p.x}px; top:{p.y}px; width:{p.w}px; height:{p.h}px;"
 				data-canvas-node={item.id}
 				data-item-id={item.id}
+				role="button"
+				tabindex="0"
 				onpointerdown={(e) => e.stopPropagation()}
 				ondblclick={() => setSelected(item.id)}
+				onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && setSelected(item.id)}
 			>
 				{#if cardImageUrl(item)}
 					<img src={cardImageUrl(item)} alt={item.title} draggable="false" />

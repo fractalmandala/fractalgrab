@@ -130,7 +130,7 @@
 </script>
 
 <div class="box grow min-h-0" style="overflow:hidden;">
-	<div bind:this={host} class="raw-host" />
+	<div bind:this={host} class="raw-host"></div>
 </div>
 
 <style>

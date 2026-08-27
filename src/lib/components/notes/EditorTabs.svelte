@@ -34,10 +34,17 @@
 			<span
 				class="tab-close"
 				role="button"
+				tabindex="0"
 				aria-label="Close {tab.name}"
 				onclick={(e) => {
 					e.stopPropagation();
 					requestCloseTab(tab.id);
+				}}
+				onkeydown={(e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.stopPropagation();
+					requestCloseTab(tab.id);
+				}
 				}}
 			>
 				<X size={12} />

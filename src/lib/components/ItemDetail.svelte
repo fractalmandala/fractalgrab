@@ -84,15 +84,15 @@
 					<Icon name={item.type === 'link' ? 'link' : item.type === 'note' ? 'file-text' : item.type === 'video' ? 'video' : 'image'} size={48} />
 				</div>
 			{/if}
-			<div class="fav" onclick={() => setFavourite(item.id, !item.favourite)} style="cursor:pointer;">
+			<div class="fav" role="button" tabindex="0" onclick={() => setFavourite(item.id, !item.favourite)} onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && setFavourite(item.id, !item.favourite)} style="cursor:pointer;">
 				<Star size={15} fill={item.favourite ? 'currentColor' : 'none'} />
 			</div>
 		</div>
 
 		<div class="detail-body scroll">
 			<div class="field">
-				<label>Title</label>
-				<input bind:value={titleDraft} onblur={titleBlur} onkeydown={(e) => e.key === 'Enter' && e.currentTarget.blur()} />
+				<label for="item-title">Title</label>
+				<input id="item-title" bind:value={titleDraft} onblur={titleBlur} onkeydown={(e) => e.key === 'Enter' && e.currentTarget.blur()} />
 				<div class="row ycenter gap8">
 					<button class="button" data-variant="quiet" data-size="sm" onclick={runAiRename.bind(null, item)}>
 						<Wand2 size={12} /> AI rename
@@ -102,7 +102,7 @@
 
 			{#if item.url}
 				<div class="field">
-					<label>Link</label>
+					<span class="text-xs" style="font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">Link</span>
 					<div class="row ycenter gap8">
 						<span class="grow text-xs text-muted truncate">{item.url}</span>
 						<button class="button" data-variant="icon" title="Open" onclick={openItem}><ExternalLink size={14} /></button>
@@ -113,7 +113,7 @@
 
 			{#if isTauri()}
 				<div class="field">
-					<label>File</label>
+					<span class="text-xs" style="font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">File</span>
 					<div class="row ycenter gap8">
 						<span class="grow text-xs text-muted truncate">{item.filename}</span>
 						<button class="button" data-variant="icon" title="Reveal in Finder" onclick={() => backend.revealInFinder(item.filename)}><Eye size={14} /></button>
@@ -123,7 +123,7 @@
 			{/if}
 
 			<div class="field">
-				<label>Collections</label>
+				<span class="text-xs" style="font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">Collections</span>
 				<div class="chips">
 					{#each collections() as col (col.id)}
 						<button
@@ -141,7 +141,7 @@
 			</div>
 
 			<div class="field">
-				<label>Tags</label>
+				<span class="text-xs" style="font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">Tags</span>
 				<div class="chips">
 					{#each item.tags ?? [] as tag (tag)}
 						<span class="badge border tag gap4">
@@ -172,13 +172,13 @@
 			</div>
 
 			<div class="field">
-				<label>Note</label>
-				<textarea rows="4" bind:value={noteDraft} onblur={() => item && setNote(item.id, noteDraft)} placeholder="A free-text note…"></textarea>
+				<label for="item-note">Note</label>
+				<textarea id="item-note" rows="4" bind:value={noteDraft} onblur={() => item && setNote(item.id, noteDraft)} placeholder="A free-text note…"></textarea>
 			</div>
 
 			{#if item.colors?.length}
 				<div class="field">
-					<label>Colours</label>
+					<span class="text-xs" style="font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">Colours</span>
 					<div class="chips">
 						{#each item.colors as hex (hex)}
 							<button
@@ -203,13 +203,13 @@
 				</div>
 				{#if item.ocrText}
 					<div class="field">
-						<label>Text in image</label>
+						<span class="text-xs" style="font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">Text in image</span>
 						<p class="text-xs text-muted" style="margin:0; max-height:120px; overflow-y:auto;">{item.ocrText}</p>
 					</div>
 				{/if}
 				{#if aiPromptResult}
 					<div class="field">
-						<label>Art prompt</label>
+						<span class="text-xs" style="font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">Art prompt</span>
 						<p class="text-xs" style="margin:0;">{aiPromptResult}</p>
 						<button class="button" data-variant="quiet" data-size="sm" onclick={() => copyText(aiPromptResult!, 'Prompt')}>
 							<Copy size={12} /> Copy prompt
@@ -219,8 +219,7 @@
 			{/if}
 
 			{#if similar.length}
-				<div class="field">
-					<label>Find similar</label>
+				<div class="field">						<span class="text-xs" style="font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">Find similar</span>
 					<div class="chips">
 						{#each similar as s (s.id)}
 							<button
