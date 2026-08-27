@@ -22,6 +22,10 @@ pub struct AppState {
 	pub library: Mutex<PathBuf>,
 	pub config_path: PathBuf,
 	pub server_running: AtomicBool,
+	/// In-memory manifest cache — the single authority for fractalgrab.json.
+	/// Both the webview (write_manifest) and the extension server (save_ext_item)
+	/// read/write through this cache to prevent lost writes.
+	pub manifest_cache: Mutex<Option<serde_json::Value>>,
 }
 
 // ---------------------------------------------------------------------------
@@ -138,10 +142,20 @@ pub fn run() {
 				.map(PathBuf::from)
 				.unwrap_or_else(default_library_dir);
 			fs::create_dir_all(&library)?;
+			// Pre-load manifest cache from disk
+			let manifest_path = library.join(MANIFEST_NAME);
+			let cached_manifest = if manifest_path.exists() {
+				fs::read_to_string(&manifest_path)
+					.ok()
+					.and_then(|s| serde_json::from_str(&s).ok())
+			} else {
+				None
+			};
 			app.manage(AppState {
 				library: Mutex::new(library),
 				config_path,
 				server_running: AtomicBool::new(false),
+				manifest_cache: Mutex::new(cached_manifest),
 			});
 			let handle = app.handle().clone();
 			spawn_backup_scheduler(handle);
@@ -206,24 +220,67 @@ fn set_library_dir(state: State<'_, AppState>, path: String) -> Result<String, S
 	config["libraryPath"] = serde_json::Value::String(path);
 	write_config(&state.config_path, &config)?;
 	*state.library.lock().map_err(|e| e.to_string())? = dir;
+	// Clear manifest cache so the new library's manifest is loaded fresh
+	manifest_clear_cache(&state);
 	Ok(get_library_dir(state).unwrap_or_default())
+}
+
+/// Read the manifest from the in-memory cache (or disk on first access).
+pub fn manifest_read(app: &AppState) -> Result<serde_json::Value, String> {
+	let mut cache = app.manifest_cache.lock().map_err(|e| e.to_string())?;
+	if let Some(ref v) = *cache {
+		return Ok(v.clone());
+	}
+	let lib = app.library.lock().map_err(|e| e.to_string())?;
+	let path = lib.join(MANIFEST_NAME);
+	let v: serde_json::Value = if path.exists() {
+		fs::read_to_string(&path)
+			.ok()
+			.and_then(|s| serde_json::from_str(&s).ok())
+			.unwrap_or_else(|| serde_json::json!({ "items": [] }))
+	} else {
+		serde_json::json!({ "items": [] })
+	};
+	*cache = Some(v.clone());
+	Ok(v)
+}
+
+/// Write the manifest to both the in-memory cache and disk.
+pub fn manifest_write(app: &AppState, v: serde_json::Value) -> Result<(), String> {
+	{
+		let mut cache = app.manifest_cache.lock().map_err(|e| e.to_string())?;
+		*cache = Some(v.clone());
+	}
+	let lib = app.library.lock().map_err(|e| e.to_string())?;
+	fs::write(
+		lib.join(MANIFEST_NAME),
+		serde_json::to_string_pretty(&v).map_err(|e| e.to_string())?,
+	)
+	.map_err(|e| e.to_string())
+}
+
+/// Clear the manifest cache (called when the library directory changes).
+pub fn manifest_clear_cache(app: &AppState) {
+	if let Ok(mut cache) = app.manifest_cache.lock() {
+		*cache = None;
+	}
 }
 
 #[tauri::command]
 fn read_manifest(state: State<'_, AppState>) -> Result<Option<String>, String> {
-	let lib = state.library.lock().map_err(|e| e.to_string())?;
-	let path = lib.join(MANIFEST_NAME);
-	if path.exists() {
-		Ok(Some(fs::read_to_string(&path).map_err(|e| e.to_string())?))
-	} else {
+	let v = manifest_read(&state)?;
+	if v.as_object().map_or(false, |o| o.is_empty()) {
 		Ok(None)
+	} else {
+		Ok(Some(serde_json::to_string_pretty(&v).map_err(|e| e.to_string())?))
 	}
 }
 
 #[tauri::command]
 fn write_manifest(state: State<'_, AppState>, contents: String) -> Result<(), String> {
-	let lib = state.library.lock().map_err(|e| e.to_string())?;
-	fs::write(lib.join(MANIFEST_NAME), contents).map_err(|e| e.to_string())
+	let v: serde_json::Value =
+		serde_json::from_str(&contents).map_err(|e| format!("invalid manifest JSON: {e}"))?;
+	manifest_write(&state, v)
 }
 
 #[tauri::command]

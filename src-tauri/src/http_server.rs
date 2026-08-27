@@ -6,7 +6,7 @@ use std::time::Duration;
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter, Manager};
 
-use crate::{now_ms, save_link, slugify, webloc_bytes, write_file_unique, AppState, MANIFEST_NAME};
+use crate::{manifest_read, manifest_write, now_ms, save_link, slugify, webloc_bytes, write_file_unique, AppState};
 
 #[derive(Deserialize)]
 struct ExtSave {
@@ -223,17 +223,15 @@ fn save_ext_item(app: &AppHandle, save: ExtSave) -> Result<ExtItem, String> {
 		height: None,
 	};
 
-	// Append to the manifest so it shows up without a rescan.
-	let manifest_path = lib.join(MANIFEST_NAME);
-	let mut manifest = if manifest_path.exists() {
-		fs_read_json(&manifest_path).unwrap_or_else(|| serde_json::json!({ "items": [] }))
-	} else {
-		serde_json::json!({ "items": [] })
-	};
-	if let Some(items) = manifest.get_mut("items").and_then(|i| i.as_array_mut()) {
-		items.push(serde_json::to_value(&item).unwrap_or_default());
+	// Append to the manifest via the shared cache (prevents race with webview persist).
+	{
+		let st = app.state::<AppState>();
+		let mut manifest = manifest_read(&st).map_err(|e| e.to_string())?;
+		if let Some(items) = manifest.get_mut("items").and_then(|i| i.as_array_mut()) {
+			items.push(serde_json::to_value(&item).unwrap_or_default());
+		}
+		manifest_write(&st, manifest).map_err(|e| e.to_string())?;
 	}
-	let _ = std::fs::write(&manifest_path, serde_json::to_string_pretty(&manifest).unwrap_or_default());
 
 	Ok(item)
 }
@@ -272,6 +270,3 @@ fn ext_from_url(u: &str) -> String {
 	}
 }
 
-fn fs_read_json(path: &std::path::Path) -> Option<serde_json::Value> {
-	std::fs::read_to_string(path).ok().and_then(|s| serde_json::from_str(&s).ok())
-}
