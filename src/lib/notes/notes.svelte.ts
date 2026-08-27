@@ -69,8 +69,13 @@ export async function initNotes() {
 		expanded = expandedByVault.get(saved.activeVaultId) ?? new Set();
 		await refreshTree();
 	}
+	// Build a lookup of saved per-tab view preferences
+	const viewPrefs = new Map<string, 'raw' | 'rich'>();
+	for (const entry of saved.openTabs ?? []) {
+		viewPrefs.set(entry.path, entry.view);
+	}
 	for (const p of saved.openPaths ?? []) {
-		await openPath(p, isInVault(p));
+		await openPath(p, isInVault(p), viewPrefs.get(p));
 	}
 	window.addEventListener('focus', () => {
 		if (activeVaultId) void refreshTree();
@@ -215,10 +220,11 @@ export function collapseFolder(path: string) {
 
 function persistOpenTabs() {
 	manifest.settings.notes.openPaths = tabs.map((t) => t.path);
+	manifest.settings.notes.openTabs = tabs.map((t) => ({ path: t.path, view: t.view }));
 	persist();
 }
 
-function makeTab(path: string, inVault: boolean, source: string, mtimeMs: number): NoteTab {
+function makeTab(path: string, inVault: boolean, source: string, mtimeMs: number, view: 'raw' | 'rich' = 'rich'): NoteTab {
 	const fm = parseFrontmatter(source);
 	return {
 		id: newId('tab'),
@@ -233,11 +239,11 @@ function makeTab(path: string, inVault: boolean, source: string, mtimeMs: number
 		conflict: false,
 		missing: false,
 		readError: null,
-		view: 'rich'
+		view
 	};
 }
 
-export async function openPath(path: string, inVault: boolean) {
+export async function openPath(path: string, inVault: boolean, view?: 'raw' | 'rich') {
 	const existing = tabs.find((t) => t.path === path);
 	if (existing) {
 		activeTabId = existing.id;
@@ -246,9 +252,9 @@ export async function openPath(path: string, inVault: boolean) {
 	let tab: NoteTab;
 	try {
 		const res = await backend.notesRead(path);
-		tab = makeTab(path, inVault, res.text, res.mtime_ms);
+		tab = makeTab(path, inVault, res.text, res.mtime_ms, view);
 	} catch (e) {
-		tab = makeTab(path, inVault, '', 0);
+		tab = makeTab(path, inVault, '', 0, view);
 		tab.missing = true;
 		tab.readError = errMsg(e);
 	}

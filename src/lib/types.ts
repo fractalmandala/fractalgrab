@@ -70,9 +70,16 @@ export interface CutState {
 	isDir: boolean;
 }
 
+export interface OpenTabEntry {
+	path: string;
+	view: 'raw' | 'rich';
+}
+
 export interface NotesSettings {
 	activeVaultId: string | null;
 	openPaths: string[];
+	/** Per-tab view preferences. Optional for backwards compat with older manifests. */
+	openTabs?: OpenTabEntry[];
 }
 
 export interface BackupSettings {
