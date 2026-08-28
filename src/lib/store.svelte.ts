@@ -1069,7 +1069,10 @@ export function bindShortcuts() {
 		const target = e.target as HTMLElement;
 		const typing = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
 		if (typing) return;
-		if (e.key === '/') {
+		if ((e.metaKey || e.ctrlKey) && e.key === '/') {
+			e.preventDefault();
+			window.dispatchEvent(new CustomEvent('fractalgrab://toggle-shortcuts'));
+		} else if (e.key === '/') {
 			e.preventDefault();
 			document.getElementById('app-search')?.focus();
 		} else if (e.key === 'c' || e.key === 'C') {

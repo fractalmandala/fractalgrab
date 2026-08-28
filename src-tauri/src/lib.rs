@@ -131,6 +131,7 @@ fn default_library_dir() -> PathBuf {
 pub fn run() {
 	tauri::Builder::default()
 		.plugin(tauri_plugin_dialog::init())
+		.plugin(tauri_plugin_window_state::Builder::new().build())
 		.setup(|app| {
 			let config_dir = app.path().app_config_dir()?;
 			fs::create_dir_all(&config_dir)?;

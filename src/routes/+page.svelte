@@ -28,6 +28,8 @@
 	import Toasts from '../lib/components/Toasts.svelte';
 	import ContextMenu from '../lib/components/ContextMenu.svelte';
 	import CanvasView from '../lib/components/CanvasView.svelte';
+	import KeyboardShortcuts from '../lib/components/KeyboardShortcuts.svelte';
+	import Onboarding from '../lib/components/Onboarding.svelte';
 	import Icon from '../lib/components/Icon.svelte';
 	import { isTauri } from '../lib/backend';
 	import {
@@ -57,6 +59,30 @@
 	let tagForBatch = $state('');
 	let batchCollectionOpen = $state(false);
 	let colorSearchOpen = $state(false);
+	let resizingSidebar = $state(false);
+	let shortcutsOpen = $state(false);
+	let onboardingOpen = $state(false);
+
+	function startSidebarResize(e: MouseEvent) {
+		e.preventDefault();
+		resizingSidebar = true;
+		const startX = e.clientX;
+		const startWidth = manifest.settings.sidebarWidth ?? 250;
+
+		function onMove(ev: MouseEvent) {
+			const delta = ev.clientX - startX;
+			const newWidth = Math.min(Math.max(startWidth + delta, 160), 420);
+			manifest.settings.sidebarWidth = newWidth;
+		}
+		function onUp() {
+			resizingSidebar = false;
+			document.removeEventListener('mousemove', onMove);
+			document.removeEventListener('mouseup', onUp);
+			persist();
+		}
+		document.addEventListener('mousemove', onMove);
+		document.addEventListener('mouseup', onUp);
+	}
 
 	const paletteChips = $derived.by(() => {
 		const seen = new Map<string, number>();
@@ -78,8 +104,15 @@
 	];
 
 	onMount(() => {
-		void load().then(() => initNotes());
+		void load().then(() => {
+			initNotes();
+			// Show onboarding on first launch (empty library)
+			if (manifest.items.length === 0 && manifest.collections.length === 0) {
+				onboardingOpen = true;
+			}
+		});
 		bindShortcuts();
+		window.addEventListener('fractalgrab://toggle-shortcuts', () => { shortcutsOpen = !shortcutsOpen; });
 		if (isTauri()) {
 			import('@tauri-apps/api/event').then(({ listen }) => {
 				listen('fractalgrab://extension-save', (e) => {
@@ -167,14 +200,15 @@
 
 <div class="appshell">
 	{#if ui.loading}
-		<div class="empty grow">
-			<div class="brand-mark" style="animation: pulse 1.2s ease-in-out infinite;"></div>
-			<p class="text-muted">Opening your library…</p>
+		<div class="loading-screen">
+			<div class="brand-mark" style="animation: pulse 1.2s ease-in-out infinite; width:48px; height:48px; border-radius:14px;"></div>
+			<p class="text-muted" style="margin-top:16px; font-size:13px;">Opening your library…</p>
 		</div>
 	{:else}
 
 		<div class="row grow min-h-0">
-			<aside class="box shrink-0 min-h-0 bg-surface border-right gap16" style="width:250px;">
+			<aside class="box shrink-0 min-h-0 bg-surface border-right gap16" style="width:{manifest.settings.sidebarWidth ?? 250}px;">
+				<div class="sidebar-resize" role="separator" aria-orientation="vertical" tabindex="-1" onmousedown={startSidebarResize}></div>
 	<div class="row ycenter gap16 pad8">
 		<div style="position:relative;">
 			<button
@@ -348,3 +382,5 @@
 <DragDial />
 <ContextMenu />
 <Toasts />
+<KeyboardShortcuts bind:open={shortcutsOpen} />
+<Onboarding bind:open={onboardingOpen} />

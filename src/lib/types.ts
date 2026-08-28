@@ -110,6 +110,7 @@ export interface Settings {
 	backup: BackupSettings;
 	ai: AISettings;
 	notes: NotesSettings;
+	sidebarWidth?: number;
 }
 
 export interface Manifest {
