@@ -1,6 +1,6 @@
 ---
-status: in-progress
-branch: not-a-git-repo (shared local checkout, no git)
+status: historical (archived session context)
+branch: main (git repo: github.com/fractalmandala/fractalgrab)
 timestamp: 2026-08-16T07:05:00-07:00
 files_modified:
   - PRODUCT.md

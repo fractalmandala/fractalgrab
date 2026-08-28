@@ -170,6 +170,47 @@ Rich-view notes: YAML frontmatter and a leading `#` h1 (when frontmatter is
 present) are hidden from the rendered view but preserved verbatim in the
 source — the frontmatter `title:` drives the tab name.
 
+## Keyboard shortcuts modal (`KeyboardShortcuts.svelte` — scoped `<style>`)
+
+| Class | Where | What it is |
+|---|---|---|
+| `.overlay` | backdrop | full-screen dim (reuses modal overlay) |
+| `.panel` | modal card | rounded surface |
+| `.panel-header` | modal | title row with close button |
+| `.shortcut-section` | modal body | one group of shortcuts |
+| `.shortcut-row` | section | `kbd` + description pair |
+| `.shortcut-keys` | row | monospace key hint badge |
+| `.shortcut-desc` | row | shortcut description text |
+
+## Onboarding (`Onboarding.svelte` — scoped `<style>`)
+
+| Class | Where | What it is |
+|---|---|---|
+| `.onboarding-overlay` | backdrop | full-screen dim with fade-in |
+| `.onboarding-panel` | modal card | rounded surface with slide-up animation |
+| `.onboarding-step` | content | centred step layout (icon, title, desc, buttons) |
+| `.onboarding-icon` | step | large themed icon container |
+| `.onboarding-btn` | step actions | primary (theme) or secondary (ghost) button |
+| `.onboarding-features` | welcome step | stacked feature highlights |
+| `.shortcuts-grid` | shortcuts step | 2-column grid of shortcut hints |
+
+## Skeleton loading (`Skeleton.svelte` — scoped `<style>`)
+
+| Class | Where | What it is |
+|---|---|---|
+| `.skeleton-grid` | container | auto-fit grid matching item card layout |
+| `.skeleton-item` | each placeholder | card shell with fade-in animation |
+| `.skel` | inner shapes | shimmer-animated gradient bar |
+| `.skel-image` | card variant | tall image placeholder |
+| `.skel-title` / `.skel-text` | card variant | text line placeholders |
+
+## Sidebar resize handle (compositions)
+
+| Class | Where | What it is |
+|---|---|---|
+| `.sidebar-resize` | sidebar edge | 6px drag handle, theme highlight on hover |
+| `.loading-screen` | app shell | centred loading state with fade-in |
+
 ## Empty / misc states
 
 | Class | Where | What it is |
@@ -183,5 +224,6 @@ source — the frontmatter `title:` drives the tab name.
   `data-variant`, `data-size`, `data-kind`) — never `--modifier` classes.
 - JIT numeric utilities (`gap8`, `gap4`) come from `virtual:fractals-styler.css`;
   the scanner picks them up from the markup automatically.
-- Animations: `toast-in` (toasts), `pulse` (loading mark) — defined at the
-  bottom of `_blocks.sass`.
+- Animations: `toast-in` (toasts), `pulse` (loading mark), `fadeIn`,
+  `slideUp`, `shimmer`, `skeletonFade` — defined in `_blocks.sass` and
+  component scoped styles.

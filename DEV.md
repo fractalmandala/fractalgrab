@@ -116,6 +116,9 @@ fractalgrab/
 │   │   ├── pdf.ts           # dependency-free canvas PDF export
 │   │   ├── iconSuggest.ts   # collection icon matching
 │   │   ├── components/      # all UI components (notes/ holds the Notes workspace)
+│   │   │   ├── KeyboardShortcuts.svelte  # Cmd+/ shortcut reference modal
+│   │   │   ├── Onboarding.svelte         # first-launch welcome wizard
+│   │   │   ├── Skeleton.svelte           # loading skeleton placeholders
 │   │   └── styles/          # fractals-styler partials + project blocks (_blocks.sass)
 │   ├── routes/+page.svelte  # the whole app shell
 │   └── routes/+layout.ts    # SPA (ssr=false, prerender off)
@@ -126,9 +129,13 @@ fractalgrab/
 │   ├── src/main.rs          # Tauri entry
 │   └── tauri.conf.json      # window, bundle, icons
 ├── extension/               # Chrome clipper
+├── scripts/                 # backup-agent.sh (launchd), gen-icon.mjs
+├── STEWARDSHIP.md           # product stewardship plan & roadmap
 ├── PRODUCT.md               # product spec (Notes module behavior)
 ├── PRODUCT-TECH.md          # tech spec (Notes module implementation plan)
-└── CLASSES.md               # full class-name reference for styling
+├── CLASSES.md               # full class-name reference for styling
+├── CONTEXT.md               # session context (historical)
+└── DEV.md                   # this file
 ```
 
 ## Architecture notes
@@ -167,13 +174,10 @@ fractalgrab/
   disk conflicts back off (dirty stays set) and the explicit Save opens an
   Overwrite / Reload / Cancel dialog. Pending saves flush on window close via
   Tauri `onCloseRequested`.
-- **Known race**: `fractalgrab.json` has two writers — the webview's `persist()`
-  and the extension server's `save_ext_item` (which appends then rewrites the
-  file). A save happening at the same moment as a UI persist can momentarily
-  lose the newer item on disk; the frontend's `extension-save` listener adds it
-  back in memory, and a lost disk entry resurfaces in the "untracked files"
-  bar, so it self-heals. A lock or single-writer refactor is a hardening
-  follow-up, not a blocker.
+- **Manifest**: `fractalgrab.json` writes are serialized through a shared
+  `Mutex<Option<serde_json::Value>>` cache in `AppState`. Both the webview's
+  `persist()` and the extension server's `save_ext_item` go through
+  `manifest_read`/`manifest_write`, so concurrent writes can't lose data.
 
 ## Troubleshooting
 

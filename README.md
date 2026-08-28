@@ -92,18 +92,31 @@ Settings, then right-click anywhere on the web. It talks only to
 
 ## Verified
 
-- `pnpm check` — 0 errors
+- `pnpm check` — 0 errors, 10 warnings (a11y, cosmetic)
+- `pnpm test` — 50/50 passed
 - `pnpm build` — clean SPA build
-- `cargo check` — clean
-- Browser preview exercised: capture (URL save pulls the real title),
-  search, colour dots, detail panel (tags/note/colours/similar), settings,
-  canvas view, collections tree.
+- `cargo check` — clean (8 snake_case warnings, cosmetic)
+- `cargo test` — 10/10 passed
+- Browser preview exercised: capture, search, colour dots, detail panel,
+  settings, canvas view, collections tree, notes workspace.
+
+## What's new (v0.3.0)
+
+- **Window-state persistence** — window size/position saved between launches
+- **Resizable sidebar** — drag the sidebar edge; width persisted
+- **Keyboard shortcuts** — Cmd+/ opens a cheat sheet
+- **Onboarding** — first-launch wizard (welcome, library folder, shortcuts)
+- **Loading skeletons** — shimmer-animated placeholders
+- **OS file-watching** — vault tree updates live
+- **launchd agent** — backups run while the app is closed
+- **Manifest race fixed** — shared mutex prevents lost writes from extension
+- **A11y warnings fixed** — 55 → 10 (cosmetic only)
 
 ## Known limits
 
 - `~/Downloads/fractalgrab` default library path (spec says “Downloads”; it
   lives *inside* Downloads so your actual Downloads stay clean).
-- “Backups when the app is closed” needs a launchd agent — the zip scheduler
-  itself is complete.
 - Tesseract OCR language data loads from the CDN on first use (offline
   caching of `tessdata` is a small follow-up).
+- Code signing not configured (personal-use app; right-click → Open to
+  bypass Gatekeeper).
